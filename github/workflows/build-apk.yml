@@ -1,0 +1,36 @@
+name: Android CI Build APK
+
+on:
+  push:
+    branches: [ "main" ] # شغل عند الرفع إلى الفرع الرئيسي
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch: # يسمح بتشغيله يدوياً من واجهة GitHub
+
+jobs:
+  build:
+    runs-on: ubuntu-latest # استخدم بيئة تشغيل Linux (أسرع وأرخص)
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: '17' # Java 17 موصى به من قبل Android
+
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+
+    - name: Build with Gradle
+      # استخدام أمر assembleRelease لبناء ملف APK للإنتاج
+      run: ./gradlew assembleRelease
+
+    - name: Upload APK
+      uses: actions/upload-artifact@v4
+      with:
+        name: app-release-apk
+        # تأكد من هذا المسار: يجب أن يكون ملف APK هنا بعد البناء الناجح
+        path: app/build/outputs/apk/release/app-release.apk
